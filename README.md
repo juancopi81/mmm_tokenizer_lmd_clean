@@ -2,9 +2,9 @@
 
 ## Tokenize the Mutopia Guitar Dataset using the Multi-Track Music Machine (MMM) representation.
 
-This code was built on top of the (implementation)[https://github.com/AI-Guru/MMM-JSB] of (Dr. Tristan Behrens)[https://www.linkedin.com/in/dr-tristan-behrens-734967a2/] of the "MMM: Exploring Conditional Multi-Track Music Generation with the Transformer" [paper](https://arxiv.org/abs/2008.06048). The changes to the original code are just a few adaptations so the repo could work with the [Mutopia Guitar Dataset](https://huggingface.co/datasets/juancopi81/mutopia_guitar_dataset).
+This code was built on top of the [implementation](https://github.com/AI-Guru/MMM-JSB) of [Dr. Tristan Behrens](https://www.linkedin.com/in/dr-tristan-behrens-734967a2/) of the "MMM: Exploring Conditional Multi-Track Music Generation with the Transformer" [paper](https://arxiv.org/abs/2008.06048). The changes to the original code are just a few adaptations so the repo could work with the [Mutopia Guitar Dataset](https://huggingface.co/datasets/juancopi81/mutopia_guitar_dataset).
 
-This repo is part of the tutorial **(MMM Mutopia Guitar)[https://github.com/juancopi81/MMM_Mutopia_Guitar]**.
+This repo is part of the tutorial **[MMM Mutopia Guitar](https://github.com/juancopi81/MMM_Mutopia_Guitar)**.
 
 ## About.
 
