@@ -15,43 +15,37 @@
 
 # Lint as: python3
 
+
 def events_to_events_data(events):
     # Ensure right order. Float to deal with music21 Fractions
     events = sorted(events, key=lambda event: float(event[2]))
 
     events_data = []
-    for event_index, event, event_next in zip(range(len(events)), events, events[1:] + [None]):
+    for event_index, event, event_next in zip(
+        range(len(events)), events, events[1:] + [None]
+    ):
         # event_index  event                    event_next
         # 0            ('NOTE_ON', 67, 0.0)     ('NOTE_OFF', 67, 4.0)
         # 1            ('NOTE_OFF', 67, 4.0)    None
         if event_index == 0 and event[2] != 0.0:
-            event_data = {
-                "type": "TIME_DELTA",
-                "delta": float(event[2])
-            }
+            event_data = {"type": "TIME_DELTA", "delta": float(event[2])}
             events_data += [event_data]
-        
-        event_data = {
-            "type": event[0],
-            "pitch": event[1]
-        }
+
+        event_data = {"type": event[0], "pitch": event[1]}
         events_data += [event_data]
-        
+
         if event_next is None:
             continue
-        
+
         delta = event_next[2] - event[2]
         assert delta >= 0, events
         if delta != 0.0:
-            event_data = {
-                "type": "TIME_DELTA",
-                "delta": float(delta)
-            }
+            event_data = {"type": "TIME_DELTA", "delta": float(delta)}
             events_data += [event_data]
-    
+
     # events_data
-    # {'events': [{'type': 'NOTE_ON', 'pitch': 67}, {'type': 'TIME_DELTA', 'delta': 4.0}, 
-    # {'type': 'NOTE_OFF', 'pitch': 67}]}, {'events': [{'type': 'NOTE_ON', 'pitch': 67}, 
+    # {'events': [{'type': 'NOTE_ON', 'pitch': 67}, {'type': 'TIME_DELTA', 'delta': 4.0},
+    # {'type': 'NOTE_OFF', 'pitch': 67}]}, {'events': [{'type': 'NOTE_ON', 'pitch': 67},
     # {'type': 'TIME_DELTA', 'delta': 8.0}
-            
+
     return events_data

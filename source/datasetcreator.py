@@ -17,23 +17,21 @@
 
 import os
 from source import logging
-from source.preprocess.music21jsb import preprocess_music21
+from source.preprocess.music21lmd import preprocess_music21
 from source.preprocess.encode import get_density_bins, encode_songs_data
 
 logger = logging.create_logger("datasetcreator")
 
+
 class DatasetCreator:
-    
     def __init__(self, config):
-        
         self.config = config
-    
+
     def create(self, dataset_path, overwrite=False):
-        
         # Make sure the dataset_path exists
         if not os.path.exists(dataset_path):
             os.mkdir(dataset_path)
-            
+
         # Make sure that path for this specific dataset exists
         dataset_path = os.path.join(dataset_path, self.config.dataset_name)
         if os.path.exists(dataset_path) and overwrite is False:
@@ -41,7 +39,7 @@ class DatasetCreator:
             return
         if not os.path.exists(dataset_path):
             os.makedirs(dataset_path)
-            
+
         # Prepare for getting music data as json
         json_data_method = None
         if self.config.json_data_method == "preprocess_music21":
@@ -52,7 +50,7 @@ class DatasetCreator:
             error_string = f"Unexpected {self.config.json_data_method}"
             logger.error(error_string)
             raise Exception(error_string)
-        
+
         # Get music data as json
         songs_data_train, songs_data_valid = json_data_method(self.config.midi_source)
 
@@ -61,9 +59,9 @@ class DatasetCreator:
             songs_data_train,
             self.config.window_size_bars,
             self.config.hop_length_bars,
-            self.config.density_bins_number
+            self.config.density_bins_number,
         )
-        
+
         # Process and save training data
         token_sequences_train = encode_songs_data(
             songs_data_train,
@@ -72,13 +70,13 @@ class DatasetCreator:
             window_size_bars=self.config.window_size_bars,
             hop_length_bars=self.config.hop_length_bars,
             density_bins=density_bins,
-            bar_fill=self.config.encoding_method == "mmmbar"
+            bar_fill=self.config.encoding_method == "mmmbar",
         )
-        
+
         dataset_path_train = os.path.join(dataset_path, "token_sequences_train.txt")
         self.__save_token_sequences(token_sequences_train, dataset_path_train)
         logger.info(f"Saved training data to {dataset_path_train}")
-        
+
         # Process and save validation data
         token_sequences_valid = encode_songs_data(
             songs_data_valid,
@@ -87,13 +85,13 @@ class DatasetCreator:
             window_size_bars=self.config.window_size_bars,
             hop_length_bars=self.config.hop_length_bars,
             density_bins=density_bins,
-            bar_fill=self.config.encoding_method == "mmmbar"
+            bar_fill=self.config.encoding_method == "mmmbar",
         )
-        
+
         dataset_path_valid = os.path.join(dataset_path, "token_sequences_valid.txt")
         self.__save_token_sequences(token_sequences_valid, dataset_path_valid)
         logger.info(f"Saved validation data to {dataset_path_valid}")
-    
+
     def __save_token_sequences(self, token_sequences, path):
         with open(path, "w") as file:
             for token_sequence in token_sequences:

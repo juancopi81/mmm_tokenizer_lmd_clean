@@ -16,10 +16,33 @@
 # Lint as: python3
 
 import os
-from source import datasetcreatorconfig
+
+import pydantic_argparse
+
+from source.datasetcreatorconfig import LMDCleanDatasetCreatorBarConfig
 from source import datasetcreator
 
+
 # Create dataset if it does not exist yet
-dataset_creator_config = datasetcreatorconfig.CustomDatasetCreatorTrackConfig()
-dataset_creator = datasetcreator.DatasetCreator(dataset_creator_config)
-dataset_creator.create(dataset_path=os.path.join("datasets"), overwrite=True)
+# dataset_creator_config = datasetcreatorconfig.CustomDatasetCreatorTrackConfig()
+# dataset_creator = datasetcreator.DatasetCreator(dataset_creator_config)
+# dataset_creator.create(dataset_path=os.path.join("datasets"), overwrite=True)
+
+
+def main() -> None:
+    # Create Parser and Parse Args
+    parser = pydantic_argparse.ArgumentParser(
+        model=LMDCleanDatasetCreatorBarConfig,
+        prog="MMM Tokenizer LMD Clean",
+        description="This programs tokenize the LMD clean dataset using the MMM tokenizer",
+        version="0.0.1",
+        epilog="Based on the implemenatation of Dr. Tristan Behrens.",
+    )
+    dataset_creator_config = parser.parse_typed_args()
+
+    # Print Args
+    print(dataset_creator_config)
+
+
+if __name__ == "__main__":
+    main()

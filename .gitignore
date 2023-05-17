@@ -33,3 +33,5 @@ venv.bak
 # MIDI files
 datasets/custom_midi_dataset/*.mid
 datasets/mutopla_guitar/
+
+datasets

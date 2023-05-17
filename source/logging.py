@@ -19,7 +19,8 @@ import logging
 
 loggers_dict = {}
 
-def create_logger(name:str):
+
+def create_logger(name: str):
     global loggers_dict
     if name in loggers_dict:
         return loggers_dict[name]
@@ -29,12 +30,15 @@ def create_logger(name:str):
         logger.setLevel(logging.DEBUG)
         handler = logging.StreamHandler()
         handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         logger.propagate = False
         return logger
-    
+
+
 def set_log_level(name, level):
     logger_names = []
     if name == "all":
