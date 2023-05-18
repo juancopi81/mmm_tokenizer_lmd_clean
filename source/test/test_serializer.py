@@ -10,7 +10,9 @@ from source.preprocess.loading.serialization import Music21Serializer
 def test_music21_serializer_load():
     test_folder_path = Path.home() / "mmm_tokenizer_lmd_clean/source/test/test_files"
     m21_serializer = Music21Serializer()
-    m21_stream = m21_serializer.load(test_folder_path / '"Weird Al" Yankovic/Amish Paradise.mid')
+    m21_stream = m21_serializer.load(
+        test_folder_path / '"Weird Al" Yankovic/Amish Paradise.mid'
+    )
     assert m21_stream.metadata.title == "Amish Paradise"
     assert str(m21_stream.metadata.getCustom("genre")[0]) == "Other"
     assert type(m21_stream) == Score

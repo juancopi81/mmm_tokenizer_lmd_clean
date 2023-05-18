@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Dict, Optional
 
-from src.loading.serialization import Serializer
+from source.preprocess.loading.serialization import Serializer
 
 
 class LoaderIterator:
