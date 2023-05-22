@@ -109,3 +109,20 @@ def test_did_load_all_batches(loader_iterator):
 
     loader_iterator._current_iteration = 2
     assert loader_iterator._did_load_all_batches() == True
+
+
+def test_set_current_iteration(loader_iterator):
+    loader_iterator.set_current_iteration(5)
+    assert loader_iterator._current_iteration == 5
+
+
+def test_write_current_iteration(tmp_path, loader_iterator):
+    # tmp_path is a pytest fixture that provides a temporary directory unique to the test invocation
+    iteration_file = tmp_path / "iteration.txt"
+    loader_iterator.set_current_iteration(10)
+    loader_iterator.write_current_iteration(iteration_file)
+
+    # Read the file and check the written iteration
+    with open(iteration_file, "r") as f:
+        written_iteration = int(f.read().strip())
+    assert written_iteration == 10

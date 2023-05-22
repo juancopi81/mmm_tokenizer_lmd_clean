@@ -16,13 +16,18 @@
 # Lint as: python3
 
 import os
+from pathlib import Path
 
 import pydantic_argparse
 
 from source.datasetcreatorconfig import LMDCleanDatasetCreatorBarConfig
 from source import datasetcreator
+from source import logging
+from source.preprocess.loading.loaderiterator import LoaderIterator
+from source.preprocess.loading.serialization import Music21Serializer
 
 
+logger = logging.create_logger("main")
 # Create dataset if it does not exist yet
 # dataset_creator_config = datasetcreatorconfig.CustomDatasetCreatorTrackConfig()
 # dataset_creator = datasetcreator.DatasetCreator(dataset_creator_config)
@@ -42,6 +47,37 @@ def main() -> None:
 
     # Print Args
     print(dataset_creator_config)
+
+    # Get songs from folder and iterate in batches
+    logger.info("Creating list of path files...")
+    midi_paths = sorted(
+        list(Path(dataset_creator_config.midi_source).glob("**/*.mid"))
+        + list(Path(dataset_creator_config.midi_source).glob("**/*.midi"))
+    )
+    logger.info(f"There are {len(midi_paths)} midi files in the directory")
+    batch_size = dataset_creator_config.num_files_per_iteration
+
+    logger.info("Loading songs...")
+    loader_iterator = LoaderIterator(Music21Serializer(), batch_size, midi_paths)
+    logger.info(f"Got {batch_size} songs.")
+
+    # Try to recover last iteration from a file
+    iteration_file = "last_iteration.txt"
+    if os.path.exists(iteration_file):
+        with open(iteration_file, "r") as f:
+            last_iteration = int(f.read().strip())
+            loader_iterator.set_current_iteration(last_iteration)
+
+    # Iterate over the batches
+    for batch_data in loader_iterator:
+        print(loader_iterator._current_iteration)
+        # Do some processing
+        # Keep some how the information in long-term storage so if the computer breaks, we can resume the processing
+        for stream in batch_data:
+            print(stream.metadata.title)
+
+        # Write current iteration to a file
+        loader_iterator.write_current_iteration(iteration_file)
 
 
 if __name__ == "__main__":

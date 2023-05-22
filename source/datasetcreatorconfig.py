@@ -46,12 +46,14 @@ class LMDCleanDatasetCreatorBarConfig(BaseModel):
         density_bins_number: An integer indicating the number of density bins.
         transpositions_train: A list of integers indicating transpositions for training.
         permute_tracks: A boolean indicating whether to permute tracks.
+        num_files_per_iteration: Number of files to process at a time.
         midi_paths: A list of strings indicating paths to MIDI files.
 
     Methods:
         check_if_paths_exists(cls, value: List): Validates that the provided MIDI file paths exist.
     """
 
+    # Optional arguments
     dataset_name: str = Field(
         "lmd_dataset_mmmtrack",
         description="Name of dataset: Folder with results of tokenization",
@@ -73,6 +75,10 @@ class LMDCleanDatasetCreatorBarConfig(BaseModel):
         [0], description="Transposition to implement for data augmentation"
     )
     permute_tracks: bool = Field(True, description="Permute tracks randomly")
+    num_files_per_iteration: int = Field(
+        10, description="Number of files to process at a time"
+    )
+    # Mandatory arguments
     midi_source: str = Field(description="Folder with the LMD dataset")
 
     @validator("midi_source")

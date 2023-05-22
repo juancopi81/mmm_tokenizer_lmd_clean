@@ -27,7 +27,8 @@ class LoaderIterator:
         self._load_paths = load_paths
 
     def __iter__(self):
-        self._current_iteration = 0
+        if self._current_iteration is None:
+            self._current_iteration = 0
         return self
 
     def __next__(self) -> List[Dict]:
@@ -36,6 +37,15 @@ class LoaderIterator:
         data_batch = self._load_data_batch()
         self._current_iteration += 1
         return data_batch
+
+    def set_current_iteration(self, iteration: int) -> None:
+        """Set the current iteration for the loader."""
+        self._current_iteration = iteration
+
+    def write_current_iteration(self, file_path: str) -> None:
+        """Write the current iteration to a file."""
+        with open(file_path, "w") as f:
+            f.write(str(self._current_iteration))
 
     def _did_load_all_batches(self) -> bool:
         if (

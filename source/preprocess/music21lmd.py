@@ -15,14 +15,11 @@
 
 # Lint as: python3
 
-import os
-from typing import List
-from pathlib import Path
+from typing import List, Dict
 
 import music21
-from music21 import converter
-from music21 import meter, tempo
-from music21 import metadata
+from music21 import meter
+from music21.stream import Score
 
 from source import logging
 from source.preprocess.preprocessutilities import events_to_events_data
@@ -31,14 +28,10 @@ from source.preprocess.preprocessutilities import events_to_events_data
 logger = logging.create_logger("music21lmd")
 
 
-def preprocess_music21(midi_source: Path):
-    logger.info("Loading songs...")
-    songs = load_lmd(midi_source)
-    logger.info(f"Got {len(songs)} songs.")
-
-    split_index = int(0.8 * len(songs))
-    songs_train = songs[:split_index]
-    songs_valid = songs[split_index:]
+def preprocess_music21(m21_streams: List[Score]) -> Dict:
+    split_index = int(0.8 * len(m21_streams))
+    songs_train = m21_streams[:split_index]
+    songs_valid = m21_streams[split_index:]
 
     logger.info(f"Using {len(songs_train)} for training.")
     logger.info(f"Using {len(songs_valid)} for validation.")
@@ -69,13 +62,14 @@ def preprocess_music21_song(song, train):
         for meter in song.recurse().getElementsByClass(music21.meter.TimeSignature)
     ]
     meters = list(set(meters))
-    if len(meters) != 1:
+    if len(meters) > 1:
         logger.debug(f"Skipping because of multiple meters.")
         return None
 
     song_data = {}
     song_data["title"] = song.metadata.title
     song_data["number"] = song.metadata.number
+    song_data["genre"] = str(song.metadata.getCustom("genre")[0])
     song_data["tracks"] = []
 
     # Add the time signature to the song
@@ -85,10 +79,6 @@ def preprocess_music21_song(song, train):
     first_measure_ts = first_part.recurse().getElementsByClass(meter.TimeSignature)[0]
     song_data["time_signature_numerator"] = first_measure_ts.numerator
     song_data["time_signature_denominator"] = first_measure_ts.denominator
-
-    # Get tempo of first measure of first part
-    first_measure_bpm = first_part.recurse().getElementsByClass(tempo.MetronomeMark)[0]
-    song_data["bpm"] = int(first_measure_bpm.getQuarterBPM())
 
     for part_index, part in enumerate(song.parts):
         track_data = preprocess_music21_part(part, part_index, train)
@@ -103,7 +93,7 @@ def preprocess_music21_part(part, part_index, train):
     track_data["number"] = part_index
     track_data["bars"] = []
 
-    for measure_index in range(1, 1000):
+    for measure_index in range(1, 100000):
         measure = part.measure(measure_index)
         if measure is None:
             break
@@ -148,23 +138,3 @@ def preprocess_music21_measure(measure, train):
     bar_data["events"] += events_to_events_data(events)
 
     return bar_data
-
-
-def load_lmd(lmd_dataset_folder: Path) -> List:
-    # This will be returned
-    originalScores = []
-
-    # List of midi files in custom dir
-    songList = os.listdir(lmd_dataset_folder)
-
-    # Load and make list of stream objects
-    for idx, song in enumerate(songList):
-        # Check that song is a MIDI file
-        if song.endswith(".mid") or song.endswith(".midi"):
-            score = converter.parse(lmd_dataset_folder + song, quantizePost=False)
-            score.insert(0, metadata.Metadata())
-            score.metadata.title = song.split(".")[0]
-            score.metadata.number = idx
-            originalScores.append(score)
-
-    return originalScores

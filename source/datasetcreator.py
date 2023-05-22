@@ -16,6 +16,11 @@
 # Lint as: python3
 
 import os
+from pathlib import Path
+from typing import List
+
+from music21.stream import Score
+
 from source import logging
 from source.preprocess.music21lmd import preprocess_music21
 from source.preprocess.encode import get_density_bins, encode_songs_data
@@ -27,7 +32,9 @@ class DatasetCreator:
     def __init__(self, config):
         self.config = config
 
-    def create(self, dataset_path, overwrite=False):
+    def create(
+        self, dataset_path: Path, m21_streams: List[Score], overwrite=False
+    ) -> None:
         # Make sure the dataset_path exists
         if not os.path.exists(dataset_path):
             os.mkdir(dataset_path)
@@ -52,7 +59,7 @@ class DatasetCreator:
             raise Exception(error_string)
 
         # Get music data as json
-        songs_data_train, songs_data_valid = json_data_method(self.config.midi_source)
+        songs_data_train, songs_data_valid = json_data_method(m21_streams)
 
         # Get density bins
         density_bins = get_density_bins(
