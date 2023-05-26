@@ -57,8 +57,29 @@ def get_bars_number(song_data):
 
 
 def get_bar_indices(bars, window_size_bars, hop_length_bars):
-    return [(0, bars)]
-    # return list(zip(range(0, bars, hop_length_bars), range(window_size_bars, bars, hop_length_bars)))
+    """
+    Gets the indices of the bars that will be used for encoding.
+
+    Args:
+        bars: The number of bars in the song.
+        window_size_bars: The size of the window in bars.
+        hop_length_bars: The hop length in bars.
+
+    Returns:
+        A list of tuples, where each tuple contains the start index and end index of a window.
+    """
+
+    indices = []
+    start = 0
+    while start + window_size_bars <= bars:
+        indices.append((start, start + window_size_bars))
+        start += hop_length_bars
+
+    # the last window is incomplete and does not overlap with the last complete window
+    if start < bars and start != indices[-1][0]:
+        indices.append((start, bars))  # add the incomplete window
+
+    return indices
 
 
 def encode_songs_data(
@@ -129,7 +150,7 @@ def encode_song_data(
             + ("_")
             + str(song_data["time_signature_denominator"])
         ]
-        token_sequence += ["BPM=" + str(song_data["bpm"])]
+        token_sequence += ["GENRE=" + str(song_data["genre"])]
 
         # Get the indices. Permute if necessary
         track_data_indices = list(range(len(song_data["tracks"])))
@@ -154,8 +175,6 @@ def encode_song_data(
 
         token_sequences += [token_sequence]
         count += 1
-        # Add PIECE_END token
-        token_sequence += ["PIECE_END"]
 
     # Done
     return token_sequences
