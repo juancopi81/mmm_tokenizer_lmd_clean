@@ -48,6 +48,7 @@ class LMDCleanDatasetCreatorBarConfig(BaseModel):
         permute_tracks: A boolean indicating whether to permute tracks.
         num_files_per_iteration: Number of files to process at a time.
         midi_paths: A list of strings indicating paths to MIDI files.
+        save_path: This is a folder where the tokenized dataset will be saved.
 
     Methods:
         check_if_paths_exists(cls, value: List): Validates that the provided MIDI file paths exist.
@@ -80,6 +81,21 @@ class LMDCleanDatasetCreatorBarConfig(BaseModel):
     )
     # Mandatory arguments
     midi_source: str = Field(description="Folder with the LMD dataset")
+    save_path: Path = Field(description="Path where tokenized dataset will be saved")
+
+    @validator("save_path", pre=True)
+    @classmethod
+    def convert_to_path(cls, value: str) -> Path:
+        """
+        Converts the provided save_path to a Path object.
+
+        Args:
+            value: A string representing the save_path.
+
+        Returns:
+            The Path object representing the save_path.
+        """
+        return Path(value)
 
     @validator("midi_source")
     @classmethod

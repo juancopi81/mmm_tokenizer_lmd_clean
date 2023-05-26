@@ -33,7 +33,11 @@ class DatasetCreator:
         self.config = config
 
     def create(
-        self, dataset_path: Path, m21_streams: List[Score], overwrite=False
+        self,
+        dataset_path: Path,
+        m21_streams: List[Score],
+        current_iteration: int,
+        overwrite=False,
     ) -> None:
         # Make sure the dataset_path exists
         if not os.path.exists(dataset_path):
@@ -80,7 +84,9 @@ class DatasetCreator:
             bar_fill=self.config.encoding_method == "mmmbar",
         )
 
-        dataset_path_train = os.path.join(dataset_path, "token_sequences_train.txt")
+        dataset_path_train = os.path.join(
+            dataset_path, f"token_sequences_train_{current_iteration}.txt"
+        )
         self.__save_token_sequences(token_sequences_train, dataset_path_train)
         logger.info(f"Saved training data to {dataset_path_train}")
 
@@ -95,7 +101,9 @@ class DatasetCreator:
             bar_fill=self.config.encoding_method == "mmmbar",
         )
 
-        dataset_path_valid = os.path.join(dataset_path, "token_sequences_valid.txt")
+        dataset_path_valid = os.path.join(
+            dataset_path, f"token_sequences_valid_{current_iteration}.txt"
+        )
         self.__save_token_sequences(token_sequences_valid, dataset_path_valid)
         logger.info(f"Saved validation data to {dataset_path_valid}")
 

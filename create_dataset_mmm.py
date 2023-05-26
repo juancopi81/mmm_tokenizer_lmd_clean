@@ -30,7 +30,6 @@ from source.preprocess.loading.serialization import Music21Serializer
 logger = logging.create_logger("main")
 # Create dataset if it does not exist yet
 # dataset_creator_config = datasetcreatorconfig.CustomDatasetCreatorTrackConfig()
-# dataset_creator = datasetcreator.DatasetCreator(dataset_creator_config)
 # dataset_creator.create(dataset_path=os.path.join("datasets"), overwrite=True)
 
 
@@ -46,7 +45,8 @@ def main() -> None:
     dataset_creator_config = parser.parse_typed_args()
 
     # Print Args
-    print(dataset_creator_config)
+    logger.info("Creating DatasetCreator")
+    dataset_creator = datasetcreator.DatasetCreator(dataset_creator_config)
 
     # Get songs from folder and iterate in batches
     logger.info("Creating list of path files...")
@@ -57,25 +57,30 @@ def main() -> None:
     logger.info(f"There are {len(midi_paths)} midi files in the directory")
     batch_size = dataset_creator_config.num_files_per_iteration
 
-    logger.info("Loading songs...")
+    logger.info("Creating loader iterator...")
     loader_iterator = LoaderIterator(Music21Serializer(), batch_size, midi_paths)
-    logger.info(f"Got {batch_size} songs.")
+    logger.info(f"Loader iterator ready.")
 
     # Try to recover last iteration from a file
-    iteration_file = "last_iteration.txt"
+    iteration_file = dataset_creator_config.save_path / "last_iteration.txt"
     if os.path.exists(iteration_file):
         with open(iteration_file, "r") as f:
             last_iteration = int(f.read().strip())
             loader_iterator.set_current_iteration(last_iteration)
 
     # Iterate over the batches
+    logger.info(f"Loading songs")
     for batch_data in loader_iterator:
-        print(loader_iterator._current_iteration)
+        logger.info(f"Got {len(batch_data)} songs")
         # Do some processing
-        # Keep some how the information in long-term storage so if the computer breaks, we can resume the processing
-        for stream in batch_data:
-            print(stream.metadata.title)
+        dataset_creator.create(
+            dataset_path=dataset_creator_config.save_path,
+            m21_streams=batch_data,
+            current_iteration=loader_iterator._current_iteration,
+            overwrite=True,
+        )
 
+        # Keep some how the information in long-term storage so if the computer breaks, we can resume the processing
         # Write current iteration to a file
         loader_iterator.write_current_iteration(iteration_file)
 
