@@ -18,7 +18,7 @@
 from typing import List, Dict
 
 import music21
-from music21 import meter
+from music21 import meter, instrument
 from music21.stream import Score
 
 from source import logging
@@ -69,7 +69,7 @@ def preprocess_music21_song(song, train):
     song_data = {}
     song_data["title"] = song.metadata.title
     song_data["number"] = song.metadata.number
-    song_data["genre"] = str(song.metadata.getCustom("genre")[0])
+    song_data["genre"] = str(song.metadata.getCustom("genre")[0]).upper()
     song_data["tracks"] = []
 
     # Add the time signature to the song
@@ -80,7 +80,14 @@ def preprocess_music21_song(song, train):
     song_data["time_signature_numerator"] = first_measure_ts.numerator
     song_data["time_signature_denominator"] = first_measure_ts.denominator
 
-    for part_index, part in enumerate(song.parts):
+    stream = instrument.partitionByInstrument(song)
+    print(f"len of stream {len(stream)}")
+
+    for part_index, part in enumerate(stream.parts):
+        part_instrument = part.getInstrument()
+        part.makeMeasures(inPlace=True)
+        part.makeTies(inPlace=True)
+        part.insert(0, part_instrument)
         track_data = preprocess_music21_part(part, part_index, train)
         song_data["tracks"] += [track_data]
 
@@ -88,16 +95,30 @@ def preprocess_music21_song(song, train):
 
 
 def preprocess_music21_part(part, part_index, train):
-    track_data = {}
-    track_data["name"] = part.partName
-    track_data["number"] = part_index
-    track_data["bars"] = []
+    # Get the instrument for this part.
+    instrument = part.getInstrument()
+    print(f"instrument {instrument} is drums = {part.partName == 'Percussion'}")
+    # Create track_data dictionary.
+    # Extract the MIDI program number, if available.
+    # If no specific instrument is found, use a default value (e.g., 0 for Piano).
+    track_data = {
+        "name": part.partName,
+        "number": part_index,
+        "midi_program": "drums"
+        if part.partName == "Percussion"
+        else instrument.midiProgram
+        if isinstance(instrument.midiProgram, int)
+        else 0,
+        "bars": [],
+    }
 
+    # Iterate over measures.
     for measure_index in range(1, 100000):
         measure = part.measure(measure_index)
+        print(f"measure {measure}")
         if measure is None:
+            print(f"measure {measure}")
             break
-
         bar_data = preprocess_music21_measure(measure, train)
         track_data["bars"] += [bar_data]
 

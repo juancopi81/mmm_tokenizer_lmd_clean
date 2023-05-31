@@ -62,7 +62,11 @@ def main() -> None:
     logger.info(f"Loader iterator ready.")
 
     # Try to recover last iteration from a file
-    iteration_file = dataset_creator_config.save_path / "last_iteration.txt"
+    iteration_file = (
+        dataset_creator_config.save_path
+        / dataset_creator_config.dataset_name
+        / "last_iteration.txt"
+    )
     if os.path.exists(iteration_file):
         with open(iteration_file, "r") as f:
             last_iteration = int(f.read().strip())

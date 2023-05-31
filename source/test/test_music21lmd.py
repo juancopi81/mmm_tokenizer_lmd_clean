@@ -1,6 +1,6 @@
 import pytest
 import music21
-from music21 import meter, note, chord
+from music21 import meter, note, chord, instrument
 from music21.stream import Score, Part, Measure
 from source.preprocess.music21lmd import (
     preprocess_music21_song,
@@ -15,6 +15,7 @@ from source.preprocess.preprocessutilities import events_to_events_data
 def create_simple_song():
     # Create first part with 2 measures
     part1 = Part()
+    part1.insert(instrument.Violin())
     for i in range(2):
         m = Measure(number=i + 1)
         for j in range(4):
@@ -23,6 +24,7 @@ def create_simple_song():
 
     # Create second part with 2 measures
     part2 = Part()
+    part2.insert(instrument.Guitar())
     for i in range(2):
         m = Measure(number=i + 1)
         for j in range(4):
@@ -60,14 +62,24 @@ def test_preprocess_music21_song(sample_song):
 
 def test_preprocess_music21_part(sample_song):
     # Use the first part of the sample song for testing
-    part = sample_song.parts[0]
+    part1 = sample_song.parts[0]
 
     # Preprocess the part
-    output = preprocess_music21_part(part, 0, True)
+    output1 = preprocess_music21_part(part1, 0, True)
 
     # Here's what we expect the output to be, based on how create_simple_song works
-    expected_output = json_output["tracks"][0]
-    assert output == expected_output
+    expected_output1 = json_output["tracks"][0]
+    assert output1 == expected_output1
+
+    # Use the second part of the sample song for testing
+    part2 = sample_song.parts[1]
+
+    # Preprocess the part
+    output2 = preprocess_music21_part(part2, 1, True)
+
+    # Here's what we expect the output to be, based on how create_simple_song works
+    expected_output2 = json_output["tracks"][1]
+    assert output2 == expected_output2
 
 
 def test_preprocess_music21_measure(sample_song):

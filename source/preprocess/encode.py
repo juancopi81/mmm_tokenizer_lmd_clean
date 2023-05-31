@@ -188,7 +188,7 @@ def encode_track_data(
     tokens += ["TRACK_START"]
 
     # Set an instrument
-    number = track_data["number"]
+    number = track_data["midi_program"]
 
     # Set the instrument if it is not a drum
     if not track_data.get("drums", False):

@@ -40,8 +40,9 @@ json_output = {
                     ]
                 },
             ],
-            "name": None,
+            "name": "Violin",
             "number": 0,
+            "midi_program": 40,
         },
         {
             "bars": [
@@ -86,8 +87,9 @@ json_output = {
                     ]
                 },
             ],
-            "name": None,
+            "name": "Guitar",
             "number": 1,
+            "midi_program": 24,
         },
     ],
 }
