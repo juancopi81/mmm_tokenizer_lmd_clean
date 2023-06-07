@@ -67,7 +67,7 @@ class LMDCleanDatasetCreatorBarConfig(BaseModel):
     )
     window_size_bars: int = Field(8, description="Number of bars per track to tokenize")
     hop_length_bars: int = Field(
-        4, description="Number of bars to jumps in each windos_size_bars"
+        8, description="Number of bars to jumps in each windos_size_bars"
     )
     density_bins_number: int = Field(
         5, description="Bins used to stablish density. Default '5'"

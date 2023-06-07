@@ -74,11 +74,7 @@ def get_bar_indices(bars, window_size_bars, hop_length_bars):
     while start + window_size_bars <= bars:
         indices.append((start, start + window_size_bars))
         start += hop_length_bars
-
-    # the last window is incomplete and does not overlap with the last complete window
-    if start < bars and start != indices[-1][0]:
-        indices.append((start, bars))  # add the incomplete window
-
+    print(indices)
     return indices
 
 

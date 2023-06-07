@@ -62,6 +62,7 @@ def preprocess_music21_song(song, train):
         for meter in song.recurse().getElementsByClass(music21.meter.TimeSignature)
     ]
     meters = list(set(meters))
+
     if len(meters) > 1:
         logger.debug(f"Skipping because of multiple meters.")
         return None
@@ -80,10 +81,12 @@ def preprocess_music21_song(song, train):
     song_data["time_signature_numerator"] = first_measure_ts.numerator
     song_data["time_signature_denominator"] = first_measure_ts.denominator
 
-    stream = instrument.partitionByInstrument(song)
-    print(f"len of stream {len(stream)}")
+    stream_by_parts = instrument.partitionByInstrument(song)
 
-    for part_index, part in enumerate(stream.parts):
+    for part in stream_by_parts.parts:
+        part.makeRests(fillGaps=True, inPlace=True)
+
+    for part_index, part in enumerate(stream_by_parts.parts):
         part_instrument = part.getInstrument()
         part.makeMeasures(inPlace=True)
         part.makeTies(inPlace=True)
@@ -98,13 +101,14 @@ def preprocess_music21_part(part, part_index, train):
     # Get the instrument for this part.
     instrument = part.getInstrument()
     print(f"instrument {instrument} is drums = {part.partName == 'Percussion'}")
+    is_drum = part.partName == "Percussion"
     # Create track_data dictionary.
     # Extract the MIDI program number, if available.
     # If no specific instrument is found, use a default value (e.g., 0 for Piano).
     track_data = {
         "name": part.partName,
         "number": part_index,
-        "midi_program": "drums"
+        "midi_program": "DRUMS"
         if part.partName == "Percussion"
         else instrument.midiProgram
         if isinstance(instrument.midiProgram, int)
@@ -115,22 +119,54 @@ def preprocess_music21_part(part, part_index, train):
     # Iterate over measures.
     for measure_index in range(1, 100000):
         measure = part.measure(measure_index)
-        print(f"measure {measure}")
         if measure is None:
-            print(f"measure {measure}")
             break
-        bar_data = preprocess_music21_measure(measure, train)
+        bar_data = preprocess_music21_measure(measure, train, is_drum)
         track_data["bars"] += [bar_data]
 
     return track_data
 
 
-def preprocess_music21_measure(measure, train):
+def preprocess_music21_measure(measure, train, is_drum):
     bar_data = {}
     bar_data["events"] = []
-
+    # Create precussion mapper
+    pm = music21.midi.percussion.PercussionMapper()
     events = []
     for event in measure.recurse():
+        if is_drum:
+            if isinstance(event, music21.note.Unpitched):
+                # Catch instruments that are not in GM Percussion Map
+                try:
+                    per_pitch = pm.midiInstrumentToPitch(event._storedInstrument)
+                except music21.midi.percussion.MIDIPercussionException:
+                    default_perc = music21.instrument.SnareDrum()
+                    per_pitch = pm.midiInstrumentToPitch(default_perc)
+
+                events += [("NOTE_ON", per_pitch.midi, 4 * event.offset)]
+                events += [
+                    (
+                        "NOTE_OFF",
+                        per_pitch.midi,
+                        4 * event.offset + 4 * event.duration.quarterLength,
+                    )
+                ]
+            if isinstance(event, music21.percussion.PercussionChord):
+                for note in event:
+                    try:
+                        per_pitch = pm.midiInstrumentToPitch(note._storedInstrument)
+                    except music21.midi.percussion.MIDIPercussionException:
+                        default_perc = music21.instrument.SnareDrum()
+                        per_pitch = pm.midiInstrumentToPitch(default_perc)
+                    events += [("NOTE_ON", per_pitch.midi, 4 * event.offset)]
+                    events += [
+                        (
+                            "NOTE_OFF",
+                            per_pitch.midi,
+                            4 * event.offset + 4 * event.duration.quarterLength,
+                        )
+                    ]
+            # print(f"Drums events {dir(event)} {event.offset}")
         # E.g. note.pitch.midi: 67, note.pitch: G4, note.offset: 0.0, note.duration.quarterLength: 1.0
         # Becomes [('NOTE_ON', 67, 0.0), ('NOTE_OFF', 67, 4.0)]
         # First check if it is note

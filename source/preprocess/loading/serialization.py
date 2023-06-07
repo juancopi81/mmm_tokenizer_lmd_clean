@@ -7,6 +7,8 @@ from music21 import converter
 from music21.stream.base import Score
 from music21 import metadata
 
+from source.preprocess.preprocessutilities import keep_first_eight_measures
+
 
 class Serializer(ABC):
     """Interface for concrete Seralization methods."""
@@ -45,10 +47,13 @@ class Music21Serializer(Serializer):
         genre_row = self.genre_df.loc[self.genre_df["Artist"] == artist_name]
 
         # Get the genre if the artist was found.
-        genre = genre_row["Genre_ChatGPT"].values[0] if not genre_row.empty else None
+        genre = genre_row["Genre_ChatGPT"].values[0] if not genre_row.empty else "other"
 
         # Load the score from the file.
         stream = converter.parse(load_path, quantizePost=False)
+        # Remove final measure with just rests
+        stream = keep_first_eight_measures(stream)
+        # Add metadata
         stream.insert(0, metadata.Metadata())
 
         # Set metadata

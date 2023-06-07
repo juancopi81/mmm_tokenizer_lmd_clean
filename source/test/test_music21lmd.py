@@ -45,7 +45,7 @@ def create_simple_song():
     s.metadata = music21.metadata.Metadata()
     s.metadata.title = "Test Song"
     s.metadata.number = 1
-    s.metadata.setCustom("genre", "Test genre")
+    s.metadata.setCustom("genre", "TEST GENRE")
     return s
 
 

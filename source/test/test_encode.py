@@ -261,7 +261,7 @@ def test_encode_song_data():
         [
             "PIECE_START",
             "TIME_SIGNATURE=4_4",
-            "GENRE=Test genre",
+            "GENRE=TEST GENRE",
             "TRACK_START",
             "INST=40",
             "DENSITY=1",
@@ -338,7 +338,7 @@ def test_encode_song_data():
         [
             "PIECE_START",
             "TIME_SIGNATURE=4_4",
-            "GENRE=Test genre",
+            "GENRE=TEST GENRE",
             "TRACK_START",
             "INST=40",
             "DENSITY=0",

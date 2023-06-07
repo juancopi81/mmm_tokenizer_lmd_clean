@@ -1,5 +1,5 @@
 json_output = {
-    "genre": "Test genre",
+    "genre": "TEST GENRE",
     "number": "1",
     "time_signature_denominator": 4,
     "time_signature_numerator": 4,

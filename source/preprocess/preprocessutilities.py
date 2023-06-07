@@ -14,6 +14,7 @@
 # limitations under the License.
 
 # Lint as: python3
+from music21 import stream, note
 
 
 def events_to_events_data(events):
@@ -49,3 +50,9 @@ def events_to_events_data(events):
     # {'type': 'TIME_DELTA', 'delta': 8.0}
 
     return events_data
+
+
+def keep_first_eight_measures(score: stream.Score) -> stream.Score:
+    # Create a new score for the output
+    new_score = score.measures(0, 8)
+    return new_score
