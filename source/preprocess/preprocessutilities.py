@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # Lint as: python3
-from music21 import stream, note
+from music21 import stream
 
 
 def events_to_events_data(events):
