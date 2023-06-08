@@ -54,5 +54,5 @@ def events_to_events_data(events):
 
 def keep_first_eight_measures(score: stream.Score) -> stream.Score:
     # Create a new score for the output
-    new_score = score.measures(0, 8)
+    new_score = score.measures(1, 8)
     return new_score
