@@ -100,7 +100,6 @@ def preprocess_music21_song(song, train):
 def preprocess_music21_part(part, part_index, train):
     # Get the instrument for this part.
     instrument = part.getInstrument()
-    print(f"instrument {instrument} is drums = {part.partName == 'Percussion'}")
     is_drum = part.partName == "Percussion"
     # Create track_data dictionary.
     # Extract the MIDI program number, if available.
