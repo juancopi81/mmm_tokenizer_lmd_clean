@@ -58,8 +58,12 @@ class LoaderIterator:
     def _load_data_batch(self) -> List[Dict]:
         start_index = self._current_iteration * self.num_files_per_iteration
         stop_index = start_index + self.num_files_per_iteration
-        return [
-            self.serializer.load(load_path)
-            for load_path in self._load_paths[start_index:stop_index]
-            if load_path.exists()
-        ]
+        batch = []
+        for load_path in self._load_paths[start_index:stop_index]:
+            if load_path.exists():
+                try:
+                    data = self.serializer.load(load_path)
+                    batch.append(data)
+                except Exception as e:
+                    print(f"Failed to load data from {load_path}: {e}")
+        return batch
